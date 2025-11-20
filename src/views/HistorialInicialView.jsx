@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";   // ✅ USO DE URL GLOBAL
 
 export default function HistorialInicialView() {
   const { idPaciente } = useParams();
@@ -13,7 +14,7 @@ export default function HistorialInicialView() {
     const fetchHistorial = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/historial-inicial/${idPaciente}`,
+          `${API_URL}/historial-inicial/${idPaciente}`,   // ⚡ REEMPLAZADO
           { headers: { Authorization: `Bearer ${getToken()}` } }
         );
         if (res.ok) {
@@ -33,7 +34,7 @@ export default function HistorialInicialView() {
   const handleSave = async () => {
     try {
       const res = await fetch(
-        `http://localhost:5000/api/historial-inicial/${idPaciente}`,
+        `${API_URL}/historial-inicial/${idPaciente}`,   // ⚡ REEMPLAZADO
         {
           method: "PUT",
           headers: {
@@ -114,7 +115,7 @@ export default function HistorialInicialView() {
 // === Estilos ===
 const background = {
   minHeight: "100vh",
-  background: "linear-gradient(to bottom, #a1c4fd, #c2e9fb)", // Fondo azul degradado
+  background: "linear-gradient(to bottom, #a1c4fd, #c2e9fb)",
   padding: "30px 15px",
 };
 

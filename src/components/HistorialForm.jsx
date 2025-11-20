@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config"; 
+
 
 const HistorialForm = ({ paciente, onBack, onSave }) => {
   const [formData, setFormData] = useState({
@@ -34,7 +36,7 @@ const HistorialForm = ({ paciente, onBack, onSave }) => {
       }
 
       const token = getToken();
-      const res = await fetch("http://localhost:5000/api/historial-inicial", {
+      const res = await fetch(`${API_URL}/api/historial-inicial`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

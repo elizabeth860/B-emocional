@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";
 
 export default function SeguimientoView() {
   const { idPaciente } = useParams();
@@ -19,7 +20,7 @@ export default function SeguimientoView() {
   useEffect(() => {
     const fetchSeguimiento = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/seguimiento/${idPaciente}`, {
+        const res = await fetch(`${API_URL}/seguimiento/${idPaciente}`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         if (res.ok) {
@@ -37,7 +38,7 @@ export default function SeguimientoView() {
 
   const handleAdd = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/seguimiento", {
+      const res = await fetch(`${API_URL}/seguimiento`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

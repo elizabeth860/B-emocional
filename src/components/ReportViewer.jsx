@@ -1,6 +1,7 @@
 // src/components/ReportViewer.jsx
 import { useEffect, useState } from "react";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";  // ✅ NUEVO
 
 export default function ReportViewer({ reporte, iaInsights, pacienteId }) {
   const [reportesPrevios, setReportesPrevios] = useState([]);
@@ -17,7 +18,7 @@ export default function ReportViewer({ reporte, iaInsights, pacienteId }) {
       try {
         const token = getToken();
         const res = await fetch(
-          `http://localhost:5000/api/reportes/${pacienteId}`,
+          `${API_URL}/api/reportes/${pacienteId}`,   // ✅ MODIFICADO
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -85,7 +86,9 @@ export default function ReportViewer({ reporte, iaInsights, pacienteId }) {
                   <p><strong>Resultado:</strong> {r.resultado_final}</p>
                   <p><strong>Recomendaciones:</strong> {r.recomendaciones}</p>
                   <small className="text-gray-500">
-                    📅 {r.fecha_reporte ? new Date(r.fecha_reporte).toLocaleString("es-MX") : "Fecha no registrada"}
+                    📅 {r.fecha_reporte
+                      ? new Date(r.fecha_reporte).toLocaleString("es-MX")
+                      : "Fecha no registrada"}
                   </small>
                 </li>
               ))}

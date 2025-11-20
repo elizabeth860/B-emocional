@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import DynamicTest from "./StandardTests/DynamicTest.jsx";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";   // ✅ NUEVO
 
 export default function TestManager({ onFinish, onCancel, pacienteId, idSesion }) {
   const [pruebas, setPruebas] = useState([]);
@@ -15,7 +16,7 @@ export default function TestManager({ onFinish, onCancel, pacienteId, idSesion }
     const fetchPruebas = async () => {
       try {
         const token = getToken();
-        const res = await axios.get("http://localhost:5000/api/pruebas", {
+        const res = await axios.get(`${API_URL}/api/pruebas`, {   // ✅ MODIFICADO
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -67,7 +68,7 @@ export default function TestManager({ onFinish, onCancel, pacienteId, idSesion }
 
         <DynamicTest
           idPrueba={prueba.id_prueba}
-          idSesion={idSesion}            // ✅ ahora pasamos idSesion real
+          idSesion={idSesion} // ✅ ahora pasamos idSesion real
           token={getToken()}
           onFinish={(result) => handleFinishTest(prueba.id_prueba, result)}
         />

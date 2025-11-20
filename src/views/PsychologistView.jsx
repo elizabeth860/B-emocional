@@ -1,6 +1,7 @@
 // src/views/ViewPsychologists.jsx
 import React, { useEffect, useState } from "react";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";
 
 const ViewPsychologists = ({ onBack }) => {
   const [psychologists, setPsychologists] = useState([]);
@@ -11,7 +12,7 @@ const ViewPsychologists = ({ onBack }) => {
     const fetchData = async () => {
       try {
         const token = getToken();
-        const res = await fetch("http://localhost:5000/api/psicologos", {
+        const res = await fetch(`${API_URL}/psicologos`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

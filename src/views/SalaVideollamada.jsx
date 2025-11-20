@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Peer from "peerjs";
 import VideoRecorder from "../components/VideoRecorder";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";
 
 function SalaVideollamada() {
   const { sala } = useParams();
@@ -70,14 +71,18 @@ function SalaVideollamada() {
   };
 
   const finalizarSesion = async () => {
-    try {
-      const res = await fetch(`http://localhost:5000/api/sesiones/${idSesion}/finalizar`, {
+  try {
+    const res = await fetch(
+      `${API_URL}/sesiones/${idSesion}/finalizar`,
+      {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${getToken()}`
         }
-      });
+      }
+    );
+
 
       if (!res.ok) throw new Error("Error al finalizar sesión");
 

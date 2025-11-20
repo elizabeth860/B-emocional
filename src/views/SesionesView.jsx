@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";
 
 export default function SesionesView() {
   const { idPaciente } = useParams();
@@ -12,7 +13,7 @@ export default function SesionesView() {
   useEffect(() => {
     const fetchSesiones = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/sesiones/paciente/${idPaciente}`, {
+        const res = await fetch(`${API_URL}/sesiones/paciente/${idPaciente}`, {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         if (!res.ok) throw new Error("Error al obtener sesiones");
@@ -22,7 +23,7 @@ export default function SesionesView() {
         const sesionesConVideos = await Promise.all(
           data.map(async (s) => {
             const resVid = await fetch(
-              `http://localhost:5000/api/sesiones/${s.id_sesion}/videos`,
+              `${API_URL}/sesiones/${s.id_sesion}/videos`,
               { headers: { Authorization: `Bearer ${getToken()}` } }
             );
             const videos = resVid.ok ? await resVid.json() : [];
@@ -63,7 +64,7 @@ export default function SesionesView() {
                       s.videos.map((v) => (
                         <div key={v.id_video} style={{ marginTop: "5px" }}>
                           <video
-                            src={`http://localhost:5000${v.ruta_video}`}
+                            src={`${API_URL}${v.ruta_video}`}
                             controls
                             style={{ width: "250px", borderRadius: "8px" }}
                           />
@@ -90,7 +91,6 @@ export default function SesionesView() {
     </div>
   );
 }
-
 // 🎨 Estilos (los mismos que ya tenías)
 const page = { minHeight: "100vh", background: "linear-gradient(180deg, #e3f2fd, #bbdefb)", display: "flex", justifyContent: "center", alignItems: "center", padding: "20px" };
 const container = { padding: "20px", maxWidth: "800px", width: "100%", background: "#ffffff", borderRadius: "16px", boxShadow: "0 6px 16px rgba(0,0,0,0.1)" };

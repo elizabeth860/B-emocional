@@ -1,9 +1,10 @@
 // src/views/ResponderPrueba.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { API_URL } from "../config";   // ✅ URL global correcta
 
 export default function ResponderPrueba() {
-  const { id_habilitacion } = useParams();  
+  const { id_habilitacion } = useParams();
   const navigate = useNavigate();
   const [prueba, setPrueba] = useState(null);
   const [respuestas, setRespuestas] = useState({});
@@ -13,7 +14,7 @@ export default function ResponderPrueba() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/pruebas/habilitacion/${id_habilitacion}`);
+        const res = await fetch(`${API_URL}/pruebas/habilitacion/${id_habilitacion}`);
         if (!res.ok) throw new Error("No se pudo cargar la prueba");
         const data = await res.json();
         setPrueba(data);
@@ -38,33 +39,33 @@ export default function ResponderPrueba() {
         id_paciente: prueba.id_paciente,
         id_prueba: prueba.id_prueba,
         id_pregunta,
-        id_opcion
+        id_opcion,
       }));
 
       // Guardar respuestas
-      await fetch("http://localhost:5000/api/respuestas/publico", {
+      await fetch(`${API_URL}/respuestas/publico`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          id_habilitacion: prueba.id_habilitacion, 
-          respuestas: values 
-        })
+        body: JSON.stringify({
+          id_habilitacion: prueba.id_habilitacion,
+          respuestas: values,
+        }),
       });
 
       // Finalizar prueba y calcular resultado
       const resFinal = await fetch(
-        `http://localhost:5000/api/pruebas/${prueba.id_prueba}/finalizar/publico`,
+        `${API_URL}/pruebas/${prueba.id_prueba}/finalizar/publico`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            id_paciente: prueba.id_paciente,       // ✅ usamos prueba.id_paciente
+            id_paciente: prueba.id_paciente, // sigue igual
             id_habilitacion: prueba.id_habilitacion,
-            id_sesion: null                        // ✅ no tienes idSesion aquí, así que enviamos null
-          })
+            id_sesion: null, // sigue igual
+          }),
         }
       );
-
+      
       const dataFinal = await resFinal.json();
       setFinalizado(dataFinal);
     } catch (err) {

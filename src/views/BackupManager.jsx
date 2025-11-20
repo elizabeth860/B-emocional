@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-
-const API_URL = "http://localhost:5000/api"; // 👈 Base correcta
+import { API_URL } from "../config"; // ✅ Usamos la URL global correcta
 
 const BackupManager = ({ onBack }) => {
   const [backups, setBackups] = useState([]);
@@ -123,7 +122,7 @@ const BackupManager = ({ onBack }) => {
   );
 };
 
-/* ✅ Estilos */
+/* 🎨 Estilos */
 const styles = {
   container: {
     padding: "30px",

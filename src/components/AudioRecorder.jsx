@@ -3,6 +3,7 @@ import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { FaMicrophone, FaStop } from "react-icons/fa";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";   // 👈 IMPORTANTE
 
 const AudioRecorder = ({ idSesion }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -41,12 +42,12 @@ const AudioRecorder = ({ idSesion }) => {
         const file = new File([audioBlob], `audio-grabacion-${Date.now()}.webm`, { type: audioBlob.type });
 
         const formData = new FormData();
-        formData.append("file", file); // 👈 siempre "file"
+        formData.append("file", file); 
         formData.append("id_sesion", idSesion);
 
         try {
           const token = getToken();
-          const API_URL = `http://${window.location.hostname}:5000`; // 👈 dinámico
+
           const res = await fetch(`${API_URL}/api/audios`, {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },

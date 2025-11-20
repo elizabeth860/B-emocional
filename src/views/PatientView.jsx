@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaUserInjured } from "react-icons/fa";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config"; 
 
 const PatientView = ({ idPaciente }) => {
   const [data, setData] = useState(null);
@@ -15,7 +16,7 @@ const PatientView = ({ idPaciente }) => {
         const token = getToken();
 
         const res = await fetch(
-          `http://localhost:5000/api/pacientes/${idPaciente}/reportes-completos`,
+           `${API_URL}/pacientes/${idPaciente}/reportes-completos`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("Error al obtener la información");
@@ -118,7 +119,11 @@ const PatientView = ({ idPaciente }) => {
                   <ul>
                     {s.videos.map((v, j) => (
                       <li key={j}>
-                        <a href={`http://localhost:5000${v}`} target="_blank" rel="noreferrer">
+                        <a 
+                          href={`${API_URL}${v}`}   // ⚡ CORREGIDO
+                          target="_blank" 
+                          rel="noreferrer"
+                        >
                           🎬 Ver grabación
                         </a>
                       </li>
@@ -153,7 +158,7 @@ const PatientView = ({ idPaciente }) => {
         const token = getToken();
 
         const res = await fetch(
-          `http://localhost:5000/api/pacientes/${idPaciente}/reportes-completos`,
+          `${API_URL}/pacientes/${idPaciente}/reportes-completos`, 
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("Error al obtener la información");
@@ -259,7 +264,11 @@ const PatientView = ({ idPaciente }) => {
                   <ul>
                     {s.videos.map((v, j) => (
                       <li key={j}>
-                        <a href={`http://localhost:5000${v}`} target="_blank" rel="noreferrer">
+                        <a 
+                          href={`${API_URL}${v}`}   // ⚡ CORREGIDO
+                          target="_blank" 
+                          rel="noreferrer"
+                        >
                           🎬 Ver grabación
                         </a>
                       </li>

@@ -1,6 +1,7 @@
 // ✅ src/components/VideoRecorder.jsx
 import React, { useRef, useState, useEffect } from "react";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config"; // ✅ NUEVO
 
 function VideoRecorder({ idSesion, tipo = "video", mediaRef, onSaved }) {
   const mediaRecorderRef = useRef(null);
@@ -17,7 +18,7 @@ function VideoRecorder({ idSesion, tipo = "video", mediaRef, onSaved }) {
     return () => clearInterval(interval);
   }, [recording]);
 
-  // ✅ Iniciar grabación usando el mismo video que se está mostrando
+  // ✅ Iniciar grabación usando el mismo video de la llamada
   const startRecording = () => {
     const stream = mediaRef?.current?.srcObject;
     if (!stream) return alert("⚠️ Primero inicia la videollamada.");
@@ -36,7 +37,7 @@ function VideoRecorder({ idSesion, tipo = "video", mediaRef, onSaved }) {
         }
       };
 
-      recorder.start(); // sin intervalo (más seguro)
+      recorder.start();
       setRecording(true);
     } catch (err) {
       console.error("❌ Error iniciando grabación:", err);
@@ -68,7 +69,8 @@ function VideoRecorder({ idSesion, tipo = "video", mediaRef, onSaved }) {
       formData.append("tipo", tipo);
 
       try {
-        const res = await fetch(`http://${window.location.hostname}:5000/api/multimedia`, {
+        // ⬇️ Aquí cambiamos el localhost por API_URL
+        const res = await fetch(`${API_URL}/api/multimedia`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${getToken()}`,
@@ -77,7 +79,10 @@ function VideoRecorder({ idSesion, tipo = "video", mediaRef, onSaved }) {
         });
 
         if (!res.ok) throw new Error("Error al subir video");
+
         alert("✅ Video guardado exitosamente");
+
+        if (onSaved) onSaved();
       } catch (err) {
         console.error("❌ Error guardando video:", err);
         alert("No se pudo guardar el video.");
@@ -88,16 +93,31 @@ function VideoRecorder({ idSesion, tipo = "video", mediaRef, onSaved }) {
   return (
     <div style={{ marginTop: "10px", textAlign: "center" }}>
       {!recording ? (
-        <button onClick={startRecording} style={btnStart}>🎥 Iniciar Grabación</button>
+        <button onClick={startRecording} style={btnStart}>
+          🎥 Iniciar Grabación
+        </button>
       ) : (
-        <button onClick={stopRecording} style={btnStop}>⛔ Detener</button>
+        <button onClick={stopRecording} style={btnStop}>
+          ⛔ Detener
+        </button>
       )}
       {recording && <p style={{ color: "red" }}>⏺ Grabando... {time}s</p>}
     </div>
   );
 }
 
-const btnStart = { background: "green", color: "white", padding: "10px", borderRadius: "8px" };
-const btnStop = { background: "red", color: "white", padding: "10px", borderRadius: "8px" };
+const btnStart = {
+  background: "green",
+  color: "white",
+  padding: "10px",
+  borderRadius: "8px",
+};
+
+const btnStop = {
+  background: "red",
+  color: "white",
+  padding: "10px",
+  borderRadius: "8px",
+};
 
 export default VideoRecorder;

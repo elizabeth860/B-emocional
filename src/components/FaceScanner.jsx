@@ -1,6 +1,7 @@
 // src/components/FaceScanner.jsx
 import React, { useRef, useState } from "react";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";   // 👈 IMPORTANTE
 
 const FaceScanner = ({ pacienteId, pruebaId }) => {
   const videoRef = useRef(null);
@@ -10,12 +11,18 @@ const FaceScanner = ({ pacienteId, pruebaId }) => {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+
       videoRef.current.srcObject = stream;
 
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
-      mediaRecorderRef.current = mediaRecorder;
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: "video/webm"
+      });
 
+      mediaRecorderRef.current = mediaRecorder;
       setChunks([]);
 
       mediaRecorder.ondataavailable = (event) => {
@@ -26,6 +33,7 @@ const FaceScanner = ({ pacienteId, pruebaId }) => {
 
       mediaRecorder.start();
       setRecording(true);
+
     } catch (err) {
       console.error("❌ Error al iniciar cámara:", err);
       alert("No se pudo acceder a la cámara/micrófono.");
@@ -40,31 +48,36 @@ const FaceScanner = ({ pacienteId, pruebaId }) => {
     setChunks([]);
 
     if (blob.size === 0) {
-      console.error("⚠️ Grabación vacía (0 bytes)");
-      alert("El archivo no se grabó correctamente.");
+      alert("⚠️ El archivo no se grabó correctamente.");
       return;
     }
 
-    const file = new File([blob], `video-grabacion-${Date.now()}.webm`, { type: blob.type });
+    const file = new File(
+      [blob],
+      `video-grabacion-${Date.now()}.webm`,
+      { type: blob.type }
+    );
 
     const formData = new FormData();
-    formData.append("file", file); // 👈 siempre "file"
+    formData.append("file", file);        // 👈 siempre "file"
     formData.append("id_paciente", pacienteId);
     formData.append("id_prueba", pruebaId);
 
     try {
       const token = getToken();
-      const API_URL = `http://${window.location.hostname}:5000`; // 👈 dinámico
-      const res = await fetch(`${API_URL}/api/videos`, {
+
+      const res = await fetch(`${API_URL}/api/videos`, {   // 👈 URL global
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`, // seguridad
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
 
       if (!res.ok) throw new Error("Error al guardar video");
+
       alert("🎥 Video guardado en el servidor");
+
     } catch (err) {
       console.error("❌ Error al subir video:", err);
       alert("Error al guardar video en el servidor.");
@@ -86,12 +99,16 @@ const FaceScanner = ({ pacienteId, pruebaId }) => {
           marginBottom: 20,
         }}
       />
+
       {!recording ? (
         <button onClick={startRecording} style={buttonStyle}>
           ▶️ Iniciar grabación
         </button>
       ) : (
-        <button onClick={stopRecording} style={{ ...buttonStyle, backgroundColor: "#E74C3C" }}>
+        <button
+          onClick={stopRecording}
+          style={{ ...buttonStyle, backgroundColor: "#E74C3C" }}
+        >
           ⏹️ Detener y guardar
         </button>
       )}

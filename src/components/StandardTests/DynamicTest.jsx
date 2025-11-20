@@ -1,9 +1,7 @@
 // src/components/StandardTests/DynamicTest.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
-// 🚀 IP dinámica
-const API_URL = `http://${window.location.hostname}:5000`;
+import { API_URL } from "../../config"; // ✅ NUEVO: usamos tu config global
 
 const DynamicTest = ({ idPrueba, idSesion, token, onFinish }) => {
   const [preguntas, setPreguntas] = useState([]);
@@ -34,6 +32,7 @@ const DynamicTest = ({ idPrueba, idSesion, token, onFinish }) => {
       ...prev,
       [idPregunta]: { respuesta: opcion, puntaje_obtenido: puntaje },
     }));
+
     if (index + 1 < preguntas.length) {
       setIndex(index + 1);
     }
@@ -64,6 +63,7 @@ const DynamicTest = ({ idPrueba, idSesion, token, onFinish }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      // Reset UI
       setIndex(0);
       setRespuestas({});
       setConfirmarEnvio(false);
@@ -81,6 +81,7 @@ const DynamicTest = ({ idPrueba, idSesion, token, onFinish }) => {
   const pregunta = preguntas[index];
   let opciones = [];
   let puntajes = [];
+
   try {
     opciones = JSON.parse(pregunta.opciones || "[]");
     puntajes = JSON.parse(pregunta.puntajes || "[]");

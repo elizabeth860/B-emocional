@@ -1,9 +1,9 @@
-// src/components/Pacientes.jsx
-import { useEffect, useState } from "react";
+// srcimport { useEffect, useState } from "react";
 import axios from "axios";
 import PacienteDetalle from "./PacienteDetalle.jsx";
 import { usePatient } from "./PatientContext.jsx";
-import { getToken } from "../services/AuthService"; // 👈 obtener token guardado
+import { getToken } from "../services/AuthService"; 
+import { API_URL } from "../config"; // ✅ IMPORTANTE
 
 export default function Pacientes({ onBack }) {
   const [pacientes, setPacientes] = useState([]);
@@ -28,7 +28,7 @@ export default function Pacientes({ onBack }) {
         return;
       }
 
-      const res = await axios.get("http://localhost:5000/api/pacientes", {
+      const res = await axios.get(`${API_URL}/api/pacientes`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -62,7 +62,7 @@ export default function Pacientes({ onBack }) {
     }
 
     try {
-      const res = await axios.delete(`http://localhost:5000/api/pacientes/${idPaciente}`, {
+      const res = await axios.delete(`${API_URL}/api/pacientes/${idPaciente}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
 
@@ -77,6 +77,7 @@ export default function Pacientes({ onBack }) {
       alert("Error al eliminar paciente");
     }
   };
+
 
   // 👉 Si seleccionó un paciente → mostrar su detalle
   if (pacienteSeleccionadoLocal) {

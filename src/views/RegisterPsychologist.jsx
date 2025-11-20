@@ -1,6 +1,7 @@
 // src/views/RegisterPsychologist.jsx
 import React, { useState } from "react";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";
 
 const RegisterPsychologist = ({ onBack }) => {
   const [form, setForm] = useState({
@@ -28,7 +29,7 @@ const RegisterPsychologist = ({ onBack }) => {
 
     try {
       const token = getToken();
-      const res = await fetch("http://localhost:5000/api/psicologos/register", {
+      const res = await fetch(`${API_URL}/psicologos/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

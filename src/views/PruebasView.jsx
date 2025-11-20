@@ -4,6 +4,7 @@ import axios from "axios";
 import DynamicTest from "../components/StandardTests/DynamicTest";
 import { getToken } from "../services/AuthService";
 import Webcam from "react-webcam";
+import { API_URL } from "../config";
 
 export default function PruebasView({ onBack, idPaciente, token: tokenProp }) {
   const [pruebas, setPruebas] = useState([]);
@@ -28,13 +29,13 @@ export default function PruebasView({ onBack, idPaciente, token: tokenProp }) {
     }
 
     try {
-      const resPruebas = await axios.get("http://localhost:5000/api/pruebas", {
+      const resPruebas = await axios.get(`${API_URL}/pruebas`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPruebas(Array.isArray(resPruebas.data) ? resPruebas.data : []);
 
       const resResultados = await axios.get(
-        `http://localhost:5000/api/resultados/${idPaciente}`,
+        `${API_URL}/resultados/${idPaciente}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setResultados(Array.isArray(resResultados.data) ? resResultados.data : []);
@@ -79,7 +80,7 @@ export default function PruebasView({ onBack, idPaciente, token: tokenProp }) {
         formData.append("id_sesion", selectedTest?.idSesion);
 
         try {
-          await axios.post("http://localhost:5000/api/videos", formData, {
+          await axios.post(`${API_URL}/videos`, formData, {
             headers: { Authorization: `Bearer ${tokenProp || getToken()}` },
           });
           console.log("✅ Video guardado en backend");
@@ -107,7 +108,7 @@ export default function PruebasView({ onBack, idPaciente, token: tokenProp }) {
     try {
       const token = tokenProp || getToken();
       const resSesion = await axios.post(
-        "http://localhost:5000/api/sesiones",
+        `${API_URL}/sesiones`,
         { id_paciente: idPaciente, observaciones: `Prueba: ${prueba.nombre}` },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -168,7 +169,7 @@ export default function PruebasView({ onBack, idPaciente, token: tokenProp }) {
               try {
                 const token = tokenProp || getToken();
                 const resReporte = await axios.post(
-                  "http://localhost:5000/api/reportes/generar",
+                  `${API_URL}/reportes/generar`,
                   { id_sesion: selectedTest.idSesion },
                   { headers: { Authorization: `Bearer ${token}` } }
                 );

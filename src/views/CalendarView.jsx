@@ -9,6 +9,7 @@ import { es } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import axios from "axios";
 import { getCurrentUser, getToken } from "../services/AuthService";
+import { API_URL } from "../config";   
 
 // 📅 Configuración local
 const locales = { es };
@@ -51,7 +52,7 @@ export default function CalendarView({ onBack }) {
   const fetchCitas = async () => {
     try {
       const token = getToken();
-      const res = await axios.get("http://localhost:5000/api/citas", {
+      const res = await axios.get(`${API_URL}/citas`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -90,7 +91,7 @@ export default function CalendarView({ onBack }) {
   const fetchPacientes = async () => {
     try {
       const token = getToken();
-      const res = await axios.get("http://localhost:5000/api/pacientes", {
+      const res = await axios.get(`${API_URL}/pacientes`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPacientes(res.data);
@@ -107,7 +108,7 @@ export default function CalendarView({ onBack }) {
     try {
       const token = getToken();
       const payload = { ...form, id_psicologo: user?.id_psicologo };
-      await axios.post("http://localhost:5000/api/citas", payload, {
+      await axios.post(`${API_URL}/citas`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setShowForm(false);
@@ -125,7 +126,7 @@ export default function CalendarView({ onBack }) {
     try {
       const token = getToken();
       await axios.put(
-  `http://localhost:5000/api/citas/${selectedEvent.resource.id_cita}/estado`,
+  `${API_URL}/citas/${selectedEvent.resource.id_cita}/estado`,
   { estado },
   { headers: { Authorization: `Bearer ${token}` } }
 );
@@ -145,7 +146,7 @@ const handleCrearSesion = async () => {
   try {
     const token = getToken();
     await axios.post(
-      "http://localhost:5000/api/sesiones",
+      `${API_URL}/sesiones`,
       {
         id_cita: selectedEvent.resource.id_cita,
         id_paciente: selectedEvent.resource.id_paciente,

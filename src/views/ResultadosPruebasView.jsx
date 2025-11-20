@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";
 
 export default function ResultadosPruebasView() {
   const { idPaciente } = useParams();
@@ -13,7 +14,7 @@ export default function ResultadosPruebasView() {
     const fetchResultados = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/pacientes/${idPaciente}/reportes-completos`,
+          `${API_URL}/pacientes/${idPaciente}/reportes-completos`,
           { headers: { Authorization: `Bearer ${getToken()}` } }
         );
         if (res.ok) {

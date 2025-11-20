@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import TestManager from "./TestManager";
 import ReportViewer from "./ReportViewer";
 import { getToken } from "../services/AuthService";
+import { API_URL } from "../config";  // 👈 IMPORTANTE
 
 export default function ChatBot({
   paciente,
@@ -30,7 +31,7 @@ export default function ChatBot({
 
     try {
       const activeToken = token || getToken();
-      const res = await fetch("http://localhost:5000/api/reportes/generar", {
+      const res = await fetch(`${API_URL}/api/reportes/generar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -177,4 +178,3 @@ Este reporte fue generado sin IA debido a un error de conexión.`,
     </div>
   );
 }
-
