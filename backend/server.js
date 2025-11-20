@@ -114,6 +114,17 @@ app.use(apiLimiter); // Se aplica a todas las rutas
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ======================
+//  RUTA DE PRUEBA /api/ping
+// ======================
+app.get("/api/ping", (req, res) => {
+  res.json({
+    ok: true,
+    message: "Servidor funcionando correctamente 🚀"
+  });
+});
+
+
 /* ================== RUTAS DE BACKUP (COLOCAR AQUÍ) ================== */
 
 console.log("Cargando rutas de /api/backup...");
