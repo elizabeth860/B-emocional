@@ -26,18 +26,15 @@ const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
 
-/* ============================
-   C O R S   P A R A   R E N D E R 
-   ============================ */
-
-const allowedOrigins = [
-  "https://b-emocional-app.onrender.com",   // FRONTEND
-  "https://b-emocional-backend.onrender.com", // BACKEND (Render a veces manda su propio origen)
-  /^http:\/\/localhost(:\d+)?$/,            // Localhost (cualquier puerto)
-];
-
+/* ============================ CORS ============================ */
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+
+  const allowedOrigins = [
+    "https://b-emocional-app.onrender.com",
+    "https://b-emocional-backend.onrender.com",
+    /^http:\/\/localhost(:\d+)?$/ 
+  ];
 
   const isAllowed = allowedOrigins.some((o) =>
     o instanceof RegExp ? o.test(origin) : o === origin
@@ -57,20 +54,33 @@ app.use((req, res, next) => {
     "GET, POST, PUT, PATCH, DELETE, OPTIONS"
   );
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
+  if (req.method === "OPTIONS") return res.sendStatus(200);
 
   next();
 });
 
+/* ===================== Body Parsers ===================== */
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+/* ===================== Límite de solicitudes ===================== */
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    error: "Demasiadas solicitudes, intenta más tarde.",
+  },
+});
+
+/* ===================== Rate Limiter ===================== */
+app.use(apiLimiter);
 
 /* ===================== Rutas ===================== */
 app.use("/api", sesionesRoutes);
 app.use("/api", backupRoutes);
-
-// ...todo lo demás (peerjs, uploads, DB, etc)
-
 
 
 /* ===================== Gemini via REST ===================== */
@@ -107,30 +117,6 @@ app.use("/peerjs", (req, res, next) => {
 console.log("✅ PeerJS activo en: ws://localhost:5000/peerjs/myapp");
 
 
-
-/* ==========================================================
-   🛡️ Protección contra ataques de fuerza bruta y DoS
-   Limita la cantidad de solicitudes que una IP puede hacer 
-   en un tiempo determinado.
-   ========================================================== */
-
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // ⏳ 15 minutos
-  max: 200, // 🚦 Máx. 200 solicitudes por IP
-  standardHeaders: true, // Devuelve información en headers: RateLimit-*
-  legacyHeaders: false,
-  message: {
-    status: 429,
-    error: "Demasiadas solicitudes, intenta más tarde."
-  },
-});
-
-app.use(apiLimiter); // Se aplica a todas las rutas
-
-
-/* ===================== Body parsers ===================== */
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // ======================
 //  RUTA DE PRUEBA /api/ping
