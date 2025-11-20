@@ -10,7 +10,6 @@ import bcrypt from "bcrypt";
 import { body, validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import multer from "multer";
-
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
@@ -25,40 +24,44 @@ import moment from "moment";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-
-
-// Rutas globales
-app.use("/api", sesionesRoutes);
-
-/* ===================== Seguridad ===================== */
 app.use(helmet());
 
-/* ===================== CORS (Permitir cualquier puerto en localhost) ===================== */
-
+//cors
 const allowedOrigins = [
-  /^http:\/\/localhost(:\d+)?$/,        // cualquier puerto localhost
-  "https://b-emocional-app.onrender.com" // tu frontend en Render
+  /^http:\/\/localhost(:\d+)?$/,
+  "https://b-emocional-app.onrender.com"
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // Postman, servidor interno
+      if (!origin) return callback(null, true);
 
-      // Verificar si coincide con localhost o tu dominio de producción
-      if (allowedOrigins.some((o) => o instanceof RegExp ? o.test(origin) : o === origin)) {
-        callback(null, true);
-      } else {
-        console.error("❌ Origen bloqueado por CORS:", origin);
-        callback(new Error("🚫 No permitido por CORS: " + origin));
+      const isAllowed = allowedOrigins.some((o) =>
+        o instanceof RegExp ? o.test(origin) : o === origin
+      );
+
+      if (isAllowed) callback(null, true);
+      else {
+        console.log("❌ Origen bloqueado:", origin);
+        callback(new Error("Not allowed by CORS"));
       }
     },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-    exposedHeaders: ["Content-Range", "Accept-Ranges"],
   })
 );
 
-console.log("✅ CORS configurado para localhost y Render");
+app.options("*", cors());
+
+console.log("🚀 CORS activo");
+
+/* ===================== Rutas ===================== */
+app.use("/api", sesionesRoutes);
+app.use("/api", backupRoutes);
+
+// ...todo lo demás (peerjs, uploads, DB, etc)
 
 
 
