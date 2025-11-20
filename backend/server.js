@@ -26,36 +26,44 @@ const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
 
-//cors
+/* ============================
+   C O R S   P A R A   R E N D E R 
+   ============================ */
+
 const allowedOrigins = [
-  /^http:\/\/localhost(:\d+)?$/,
-  "https://b-emocional-app.onrender.com"
+  "https://b-emocional-app.onrender.com",   // FRONTEND
+  "https://b-emocional-backend.onrender.com", // BACKEND (Render a veces manda su propio origen)
+  /^http:\/\/localhost(:\d+)?$/,            // Localhost (cualquier puerto)
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-      const isAllowed = allowedOrigins.some((o) =>
-        o instanceof RegExp ? o.test(origin) : o === origin
-      );
+  const isAllowed = allowedOrigins.some((o) =>
+    o instanceof RegExp ? o.test(origin) : o === origin
+  );
 
-      if (isAllowed) callback(null, true);
-      else {
-        console.log("❌ Origen bloqueado:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+  if (isAllowed) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
 
-app.options("*", cors());
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+  );
 
-console.log("🚀 CORS activo");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
+
 
 /* ===================== Rutas ===================== */
 app.use("/api", sesionesRoutes);
@@ -137,8 +145,8 @@ app.get("/api/ping", (req, res) => {
 
 /* ================== RUTAS DE BACKUP (COLOCAR AQUÍ) ================== */
 
-console.log("Cargando rutas de /api/backup...");
-app.use("/api", backupRoutes);
+//console.log("Cargando rutas de /api/backup...");
+//app.use("/api", backupRoutes);
 
 
 /* ===================== MySQL Pool ===================== */
