@@ -16,8 +16,11 @@ import fs from "fs";
 import fsExtra from "fs-extra";
 import http from "http";
 import { ExpressPeerServer } from "peer";
-import backupRoutes from "./routes/backup.routes.js";
+
+// Rutas externas
 import sesionesRoutes from "./routes/sesiones.routes.js";
+import backupRoutes from "./routes/backup.routes.js";
+
 import PDFDocument from "pdfkit";
 import moment from "moment";
 
@@ -26,17 +29,18 @@ const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
 
-/* ============================ CORS ============================ */
+/* =======================================================
+   CORS
+======================================================= */
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-
   const allowedOrigins = [
     "https://b-emocional-app.onrender.com",
     "https://b-emocional-backend.onrender.com",
-    /^http:\/\/localhost(:\d+)?$/ 
+    /^http:\/\/localhost(:\d+)?$/ // local
   ];
 
-  const isAllowed = allowedOrigins.some((o) =>
+  const isAllowed = allowedOrigins.some(o =>
     o instanceof RegExp ? o.test(origin) : o === origin
   );
 
@@ -55,17 +59,20 @@ app.use((req, res, next) => {
   );
 
   if (req.method === "OPTIONS") return res.sendStatus(200);
-
   next();
 });
 
-/* ===================== Body Parsers ===================== */
+/* =======================================================
+   Body parsers
+======================================================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* ===================== Límite de solicitudes ===================== */
+/* =======================================================
+   Rate limiter (DEBE IR DESPUÉS DE JSON)
+======================================================= */
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, 
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
@@ -74,59 +81,49 @@ const apiLimiter = rateLimit({
     error: "Demasiadas solicitudes, intenta más tarde.",
   },
 });
-
-/* ===================== Rate Limiter ===================== */
 app.use(apiLimiter);
 
-/* ===================== Rutas ===================== */
+/* =======================================================
+   🔥 ORDEN CORRECTO DE RUTAS (ESTE ES EL PUNTO CLAVE)
+======================================================= */
+
+// 2️⃣ Luego las demás rutas protegidas
 app.use("/api", sesionesRoutes);
 app.use("/api", backupRoutes);
 
+/* =======================================================
+   RUTAS BÁSICAS / DIAGNÓSTICAS
+======================================================= */
 
-/* ===================== Gemini via REST ===================== */
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = "gemini-2.5-flash"; // modelo correcto de viste en AI Studio
-
-
-/* ===================== 🎥 Configuración de PeerJS (Videollamadas WebRTC) ===================== */
-
-/**
- * PeerJS permite crear videollamadas P2P entre navegadores.
- * Para funcionar, necesita un servidor "señalizador" que conecte a ambos usuarios.
- * Aquí lo levantamos en la misma app Express (http://tu-ip:5000/peerjs/myapp).
- */
-
-// 1️⃣ Crear servidor HTTP base (permite REST + WebSockets)
-const server = http.createServer(app);
-
-// 2️⃣ Configurar PeerJS Server
-const peerServer = ExpressPeerServer(server, {
-  path: "/myapp",          // Ruta interna para PeerJS
-  debug: true,             // Muestra mensajes de conexión/desconexión
-  allow_discovery: true,   // Permite listar pares conectados (puede desactivarse en producción)
+// Ruta raíz
+app.get("/", (_req, res) => {
+  res.send("✅ Backend de B-emocional corriendo");
 });
 
-// 3️⃣ Exponer PeerJS en /peerjs
-app.use("/peerjs", (req, res, next) => {
-  // ✅ ⚠️ Protección opcional: solo permitir videollamadas si el usuario tiene un token válido
-  // if (!req.headers.authorization) return res.status(403).json({ message: "Token requerido para videollamada" });
-
-  next();
-}, peerServer);
-
-console.log("✅ PeerJS activo en: ws://localhost:5000/peerjs/myapp");
-
-
-
-// ======================
-//  RUTA DE PRUEBA /api/ping
-// ======================
+// Ruta de prueba
 app.get("/api/ping", (req, res) => {
   res.json({
     ok: true,
     message: "Servidor funcionando correctamente 🚀"
   });
 });
+
+/* =======================================================
+   PeerJS para videollamadas
+======================================================= */
+const server = http.createServer(app);
+const peerServer = ExpressPeerServer(server, {
+  path: "/myapp",
+  debug: true,
+  allow_discovery: true,
+});
+
+// Montar PeerJS
+app.use("/peerjs", peerServer);
+
+console.log("✅ PeerJS activo en: ws://localhost:5000/peerjs/myapp");
+
+
 
 
 /* ================== RUTAS DE BACKUP (COLOCAR AQUÍ) ================== */
