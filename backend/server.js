@@ -35,15 +35,21 @@ app.use(helmet());
 
 /* ===================== CORS (Permitir cualquier puerto en localhost) ===================== */
 
+const allowedOrigins = [
+  /^http:\/\/localhost(:\d+)?$/,        // cualquier puerto localhost
+  "https://b-emocional-app.onrender.com" // tu frontend en Render
+];
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // Postman o herramientas sin origen
+      if (!origin) return callback(null, true); // Postman, servidor interno
 
-      // ✅ Permitir cualquier origen que empiece con 'http://localhost'
-      if (origin.startsWith("http://localhost")) {
+      // Verificar si coincide con localhost o tu dominio de producción
+      if (allowedOrigins.some((o) => o instanceof RegExp ? o.test(origin) : o === origin)) {
         callback(null, true);
       } else {
+        console.error("❌ Origen bloqueado por CORS:", origin);
         callback(new Error("🚫 No permitido por CORS: " + origin));
       }
     },
@@ -52,7 +58,8 @@ app.use(
   })
 );
 
-console.log("✅ CORS configurado: Solo localhost en cualquier puerto");
+console.log("✅ CORS configurado para localhost y Render");
+
 
 
 /* ===================== Gemini via REST ===================== */
