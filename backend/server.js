@@ -68,20 +68,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* =======================================================
-   Rate limiter (DEBE IR DESPUÉS DE JSON)
-======================================================= */
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 200,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    status: 429,
-    error: "Demasiadas solicitudes, intenta más tarde.",
-  },
-});
-app.use(apiLimiter);
 
 /* =======================================================
    🔥 ORDEN CORRECTO DE RUTAS (ESTE ES EL PUNTO CLAVE)
@@ -121,7 +107,8 @@ const peerServer = ExpressPeerServer(server, {
 // Montar PeerJS
 app.use("/peerjs", peerServer);
 
-console.log("✅ PeerJS activo en: ws://localhost:5000/peerjs/myapp");
+console.log(`PeerJS activo en: ws://${process.env.MY_DOMAIN}/peerjs/myapp`);
+
 
 
 
@@ -290,14 +277,6 @@ const storageMultimedia = multer.diskStorage({
 
 const uploadMultimedia = multer({ storage: storageMultimedia });
 
-/* ==================================================
-   📌 Ruta base (comprobación del servidor)
-   - Sirve para verificar que el backend está activo.
-   - Si accedes a http://localhost:5000 muestra un mensaje.
-================================================== */
-app.get("/", (_req, res) => {
-  res.send("✅ Backend de B-emocional corriendo");
-});
 
 /* ==================================================
    🎥 Streaming de videos con soporte Range (para reproducir sin descargar)
@@ -2235,6 +2214,25 @@ app.put("/api/citas/:id/estado", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Error interno al actualizar cita" });
   }
 });
+
+
+/* =======================================================
+   Rate limiter global 
+   No afecta login ni rutas esenciales
+======================================================= */
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    error: "Demasiadas solicitudes, intenta más tarde.",
+  },
+});
+
+//LUGAR CORRECTO
+app.use(apiLimiter);
 
 /* ==================================================
    Start server
