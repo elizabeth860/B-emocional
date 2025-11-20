@@ -110,9 +110,6 @@ app.use("/peerjs", peerServer);
 console.log(`PeerJS activo en: ws://${process.env.MY_DOMAIN}/peerjs/myapp`);
 
 
-
-
-
 /* ================== RUTAS DE BACKUP (COLOCAR AQUÍ) ================== */
 
 //console.log("Cargando rutas de /api/backup...");
