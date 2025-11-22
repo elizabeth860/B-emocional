@@ -435,14 +435,15 @@ app.post(
  * - El token contiene: id_usuario, rol e id_psicologo (si aplica).
  * - El frontend debe guardarlo (localStorage o sessionStorage) y enviarlo en cada petición privada.
  */
-app.post(
+/**app.post(
   "/api/login",
   [
     body("correo").isEmail().normalizeEmail(),
     body("password").isLength({ min: 6 })
   ],
-  async (req, res) => {
+  async (req, res) => {*/
     // ⚠ Validación de datos de entrada
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ message: "Datos inválidos", errors: errors.array() });
