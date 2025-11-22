@@ -16,6 +16,8 @@ import fs from "fs";
 import fsExtra from "fs-extra";
 import http from "http";
 import { ExpressPeerServer } from "peer";
+import authRoutes from "./routes/auth.routes.js";
+
 
 // Rutas externas
 import sesionesRoutes from "./routes/sesiones.routes.js";
@@ -80,7 +82,7 @@ app.use(express.urlencoded({ extended: true }));
 /* =======================================================
    🔥 ORDEN CORRECTO DE RUTAS (ESTE ES EL PUNTO CLAVE)
 ======================================================= */
-
+app.use("/api", authRoutes);
 // 2️⃣ Luego las demás rutas protegidas
 app.use("/api", sesionesRoutes);
 app.use("/api", backupRoutes);
