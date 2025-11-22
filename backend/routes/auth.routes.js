@@ -1,12 +1,13 @@
-// routes/auth.routes.js
 import { Router } from "express";
-import { db } from "../db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import mysql from "mysql2/promise";
 
-const router = Router();
+export const router = Router();
 
-// 🔐 LOGIN
+// Usa pool desde db.js
+import { db as pool } from "../db.js";
+
 router.post("/login", async (req, res) => {
   try {
     const { correo, password } = req.body;
@@ -15,41 +16,59 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Faltan datos" });
     }
 
-    // Verificar usuario
-    const [rows] = await db.query(
-      "SELECT * FROM psicologos WHERE correo = ? LIMIT 1",
+    // 1️⃣ Buscar usuario en tabla usuarios
+    const [rows] = await pool.query(
+      "SELECT id_usuario, nombre, correo, password, rol FROM usuarios WHERE correo = ? LIMIT 1",
       [correo]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
+    if (!rows.length) {
+      return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
     const user = rows[0];
 
-    // Validar contraseña
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: "Contraseña incorrecta" });
+    // 2️⃣ Verificar password
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) {
+      return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    // JWT
+    // 3️⃣ Si es psicólogo → obtener id_psicologo
+    let id_psicologo = null;
+    if (user.rol === "psicologo") {
+      const [p] = await pool.query(
+        "SELECT id_psicologo FROM psicologos WHERE id_usuario = ?",
+        [user.id_usuario]
+      );
+      id_psicologo = p[0]?.id_psicologo || null;
+    }
+
+    const roleNumber = user.rol === "admin" ? 1 : 2;
+
+    // 4️⃣ Crear token
     const token = jwt.sign(
-      { id: user.id_psicologo, correo: user.correo },
+      { id_usuario: user.id_usuario, role: roleNumber, id_psicologo },
       process.env.JWT_SECRET,
-      { expiresIn: "3d" }
+      { expiresIn: "2h" }
     );
 
     delete user.password;
 
     res.json({
       ok: true,
-      token,
-      user,
+      message: "Login exitoso",
+      user: {
+        id_usuario: user.id_usuario,
+        nombre: user.nombre,
+        role: roleNumber,
+        id_psicologo
+      },
+      token
     });
+
   } catch (error) {
-    console.error("Error en login:", error);
+    console.error("❌ Error en login:", error);
     res.status(500).json({ message: "Error en el servidor" });
   }
 });

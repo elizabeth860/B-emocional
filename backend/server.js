@@ -35,11 +35,12 @@ const PORT = process.env.PORT || 5000;
    CORS - REGLAS CORRECTAS
 =========================== */
 const allowedOrigins = [
-  "https://b-emocional-app.onrender.com",
-  "https://b-emocional-backend.onrender.com",
-  "http://localhost:5173",
-  "http://localhost:3000"
+  "https://b-emocional-app.onrender.com",  // frontend en Render
+  "https://b-emocional.onrender.com",      // backend en Render
+  "http://localhost:5173",                 // frontend local
+  "http://localhost:3000"                  // otro front local si lo usas
 ];
+
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -428,87 +429,6 @@ app.post(
   }
 );
 
-/**
- * ✅ 2. Login / Inicio de sesión
- * - Verifica correo y contraseña.
- * - Si son correctos, se genera un TOKEN JWT.
- * - El token contiene: id_usuario, rol e id_psicologo (si aplica).
- * - El frontend debe guardarlo (localStorage o sessionStorage) y enviarlo en cada petición privada.
- */
-/**app.post(
-  "/api/login",
-  [
-    body("correo").isEmail().normalizeEmail(),
-    body("password").isLength({ min: 6 })
-  ],
-  async (req, res) => {*/
-    // ⚠ Validación de datos de entrada
-    
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ message: "Datos inválidos", errors: errors.array() });
-    }
-
-    const { correo, password } = req.body;
-
-    try {
-      // 🔎 Buscar usuario por correo
-      const [rows] = await pool.query(
-        "SELECT id_usuario, nombre, correo, password, rol FROM usuarios WHERE correo = ? LIMIT 1",
-        [correo]
-      );
-      if (!rows.length) {
-        return res.status(401).json({ message: "Credenciales inválidas" });
-      }
-
-      const user = rows[0];
-
-      // 🔐 Verificar contraseña cifrada
-      const ok = await bcrypt.compare(password, user.password);
-      if (!ok) {
-        return res.status(401).json({ message: "Credenciales inválidas" });
-      }
-
-      // 📌 Si es psicólogo, obtener su id_psicologo
-      let id_psicologo = null;
-      if (user.rol === "psicologo") {
-        const [p] = await pool.query(
-          "SELECT id_psicologo FROM psicologos WHERE id_usuario = ?",
-          [user.id_usuario]
-        );
-        id_psicologo = p[0]?.id_psicologo || null;
-      }
-
-            // 🎫 Crear token con datos del usuario (JWT)
-// - jwt.sign() genera un token seguro que viaja al frontend
-// - Este token incluye: id del usuario, su rol (admin/psicólogo) y id_psicologo si aplica
-// - Se firma con la clave secreta del archivo .env para evitar falsificación
-// - Expira en 2 horas por seguridad (luego debe iniciar sesión otra vez)
-      const roleNumber = user.rol === "admin" ? 1 : 2;
-      const token = jwt.sign(
-        { id_usuario: user.id_usuario, role: roleNumber, id_psicologo },
-        process.env.JWT_SECRET,
-        { expiresIn: "2h" } // ⏳ El token expira en 2 horas
-      );
-
-      // ✅ Enviar respuesta
-      res.json({
-        message: "✅ Login exitoso",
-        user: {
-          id_usuario: user.id_usuario,
-          nombre: user.nombre,
-          role: roleNumber,
-          id_psicologo
-        },
-        token
-      });
-
-    } catch (err) {
-      console.error("❌ Error en login:", err);
-      res.status(500).json({ message: "Error en login" });
-    }
-  }
-);
 
 
 /** Cambiar contraseña (usuarios) */
