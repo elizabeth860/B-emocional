@@ -27,18 +27,19 @@ import moment from "moment";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(helmet());
+
 
 /* =======================================================
-   CORS
+   CORS 
 ======================================================= */
+const allowedOrigins = [
+  "https://b-emocional-app.onrender.com",
+  "https://b-emocional-backend.onrender.com",
+  /^http:\/\/localhost(:\d+)?$/ // Localhost cualquier puerto
+];
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const allowedOrigins = [
-    "https://b-emocional-app.onrender.com",
-    "https://b-emocional-backend.onrender.com",
-    /^http:\/\/localhost(:\d+)?$/ // local
-  ];
 
   const isAllowed = allowedOrigins.some(o =>
     o instanceof RegExp ? o.test(origin) : o === origin
@@ -59,8 +60,15 @@ app.use((req, res, next) => {
   );
 
   if (req.method === "OPTIONS") return res.sendStatus(200);
+
   next();
 });
+
+/* =======================================================
+   Helmet
+======================================================= */
+
+app.use(helmet());
 
 /* =======================================================
    Body parsers
