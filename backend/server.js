@@ -31,46 +31,40 @@ const PORT = process.env.PORT || 5000;
 
 
 
-/* =======================================================
-   CORS 
-======================================================= */
+/* ========================
+   CORS - REGLAS CORRECTAS
+=========================== */
 const allowedOrigins = [
   "https://b-emocional-app.onrender.com",
   "https://b-emocional-backend.onrender.com",
-  /^http:\/\/localhost(:\d+)?$/ // Localhost cualquier puerto
+  "http://localhost:5173",
+  "http://localhost:3000"
 ];
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  const isAllowed = allowedOrigins.some(o =>
-    o instanceof RegExp ? o.test(origin) : o === origin
-  );
-
-  if (isAllowed) {
-    res.header("Access-Control-Allow-Origin", origin);
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
   }
 
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header(
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
-  res.header(
+  res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, PATCH, DELETE, OPTIONS"
   );
 
-  if (req.method === "OPTIONS") return res.sendStatus(200);
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
   next();
 });
 
-/* =======================================================
-   Helmet
-======================================================= */
-
-app.use(helmet());
 
 /* =======================================================
    Body parsers
